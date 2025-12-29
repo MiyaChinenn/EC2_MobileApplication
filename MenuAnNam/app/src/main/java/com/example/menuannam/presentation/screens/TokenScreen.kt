@@ -32,7 +32,7 @@ import kotlinx.coroutines.withContext
 fun TokenScreen(
     email: String,
     changeMessage: (String) -> Unit,
-    navigateToHome: () -> Unit
+    navigateToHome: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -57,6 +57,15 @@ fun TokenScreen(
                 .semantics { contentDescription = "tokenTextField" },
             label = { Text("token") }
         )
+        OutlinedTextField(
+            value = email,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = "emailTextField" },
+            label = { Text("email") },
+            readOnly = true
+        )
         Button(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +78,7 @@ fun TokenScreen(
                             preferences[TOKEN] = token
                         }
                     }
-                    navigateToHome()
+                    navigateToHome(token)
                 }
             }
         ) {

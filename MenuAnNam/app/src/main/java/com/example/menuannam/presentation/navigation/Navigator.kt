@@ -29,7 +29,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.menuannam.data.database.FlashCardDao
-import com.example.menuannam.data.entity.FlashCard
 import com.example.menuannam.presentation.screens.MenuAnNam
 import com.example.menuannam.presentation.screens.AddScreen
 import com.example.menuannam.presentation.screens.StudyScreen
@@ -64,10 +63,6 @@ fun AppNavigation(
     val navigateToToken = fun(email: String) {
         currentEmail = email
         navController.navigate("Token/$email")
-    }
-    val navigateToHome = fun() {
-        // After successful login/token, return to the main menu
-        navController.navigate("Main")
     }
     val navigateToShowCard = fun(cardId: Int) {
         navController.navigate("ShowCard/$cardId")
@@ -176,7 +171,13 @@ fun AppNavigation(
                 TokenScreen(
                     email = email,
                     changeMessage = changeMessage,
-                    navigateToHome = navigateToHome
+                    navigateToHome = { receivedToken ->
+                        currentEmail = email
+                        changeMessage("Token received for $currentEmail")
+                        navController.navigate("Main") {
+                            popUpTo("Main") { inclusive = true }
+                        }
+                    }
                 )
             }
             // HOME removed: Menu screen now handles 'home' behavior

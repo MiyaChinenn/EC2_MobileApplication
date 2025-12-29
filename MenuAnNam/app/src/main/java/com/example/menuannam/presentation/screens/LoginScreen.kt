@@ -31,7 +31,6 @@ fun LoginScreen(
     networkService: NetworkService,
     navigateToToken: (String) -> Unit
 ) {
-    var token by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
@@ -43,16 +42,6 @@ fun LoginScreen(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        OutlinedTextField(
-            value = token,
-            onValueChange = { /* This callback will not be triggered when readOnly is true */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { contentDescription = "tokenTextField" },
-            label = { Text("token") },
-            readOnly = true // Set to true to make it read-only
-        )
-
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
