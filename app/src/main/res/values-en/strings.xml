@@ -1,0 +1,5 @@
+<resources>
+    <string name= "app_name">MenuAnNam</string>
+    <string name= "English_Label">English</string>
+    <string name= "Vietnamese_Label">Vietnamese</string>
+</resources>
