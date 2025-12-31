@@ -2,25 +2,44 @@ package com.example.menuannam.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-// Define a home route that doesn't take any arguments
+// Main Menu
 @Serializable
-object HomeRoute
+object MainRoute
 
+// Add Card
 @Serializable
-object AddCardRoute
+object AddRoute
 
+// Study Cards
 @Serializable
-object StudyCardsRoute
+object StudyRoute
 
+// Search Cards
 @Serializable
-object SearchCardsRoute
+object SearchRoute
 
+// Login
 @Serializable
 object LoginRoute
 
-// Define a showcardroute route that takes a english and a vietnamese word
+// Token (takes email parameter)
 @Serializable
-data class ShowCardRoute(val english: String, val vietnamese: String)
+data class TokenRoute(val email: String)
 
+// Show Card (takes cardId parameter)
 @Serializable
-data class EditCardRoute(val english: String, val vietnamese: String)
+data class ShowCardRoute(val cardId: Int)
+
+// Deprecated routes (kept for reference):
+// @Serializable
+// object HomeRoute
+// @Serializable
+// object AddCardRoute
+// @Serializable
+// object StudyCardsRoute
+// @Serializable
+// object SearchCardsRoute
+// @Serializable
+// data class ShowCardRoute(val english: String, val vietnamese: String)
+// @Serializable
+// data class EditCardRoute(val english: String, val vietnamese: String)
