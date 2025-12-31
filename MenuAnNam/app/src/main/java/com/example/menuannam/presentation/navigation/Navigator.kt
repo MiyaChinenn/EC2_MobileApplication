@@ -23,12 +23,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.example.menuannam.data.database.FlashCardDao
+import com.example.menuannam.presentation.navigation.MainRoute
+import com.example.menuannam.presentation.navigation.AddRoute
+import com.example.menuannam.presentation.navigation.StudyRoute
+import com.example.menuannam.presentation.navigation.SearchRoute
+import com.example.menuannam.presentation.navigation.LoginRoute
+import com.example.menuannam.presentation.navigation.TokenRoute
+import com.example.menuannam.presentation.navigation.ShowCardRoute
+import kotlin.reflect.typeOf
 import com.example.menuannam.presentation.screens.MenuAnNam
 import com.example.menuannam.presentation.screens.AddScreen
 import com.example.menuannam.presentation.screens.StudyScreen
@@ -49,23 +56,23 @@ fun AppNavigation(
     var currentEmail by remember { mutableStateOf("") }
     
     val navigateToAdd = fun() {
-        navController.navigate("Add")
+        navController.navigate(AddRoute)
     }
     val navigateToStudy = fun() {
-        navController.navigate("Study")
+        navController.navigate(StudyRoute)
     }
     val navigateToSearch = fun() {
-        navController.navigate("Search")
+        navController.navigate(SearchRoute)
     }
     val navigateToLogin = fun() {
-        navController.navigate("Login")
+        navController.navigate(LoginRoute)
     }
     val navigateToToken = fun(email: String) {
         currentEmail = email
-        navController.navigate("Token/$email")
+        navController.navigate(TokenRoute(email))
     }
     val navigateToShowCard = fun(cardId: Int) {
-        navController.navigate("ShowCard/$cardId")
+        navController.navigate(ShowCardRoute(cardId))
     }
     val changeMessage = fun(text:String){
         message = text
@@ -88,7 +95,7 @@ fun AppNavigation(
                 navigationIcon = {
                     val currentRoute =
                         navController.currentBackStackEntryAsState().value?.destination?.route
-                    if (currentRoute != "Main") {
+                    if (currentRoute != MainRoute::class.simpleName) {
                         Button(
                             modifier = Modifier.semantics{contentDescription="navigateBack"},
                             onClick = {
@@ -119,10 +126,10 @@ fun AppNavigation(
             modifier = Modifier.padding(innerPadding)
                 .fillMaxWidth(),
             navController = navController,
-            startDestination = "Main"
+            startDestination = MainRoute
         ) {
             // MAIN
-            composable(route = "Main") {
+            composable<MainRoute> {
                 MenuAnNam(
                     changeMessage = changeMessage,
                     onAdd = navigateToAdd,
@@ -132,14 +139,14 @@ fun AppNavigation(
                 )
             }
             // ADD
-            composable(route = "Add") {
+            composable<AddRoute> {
                 AddScreen(
                     changeMessage = changeMessage,
                     flashCardDao = flashCardDao
                 )
             }
             // STUDY
-            composable(route = "Study") {
+            composable<StudyRoute> {
                 StudyScreen(
                     changeMessage = changeMessage,
                     flashCardDao = flashCardDao,
@@ -147,7 +154,7 @@ fun AppNavigation(
                 )
             }
             // SEARCH
-            composable(route = "Search") {
+            composable<SearchRoute> {
                 SearchScreen(
                     changeMessage = changeMessage,
                     flashCardDao = flashCardDao,
@@ -155,7 +162,7 @@ fun AppNavigation(
                 )
             }
             // LOGIN
-            composable(route = "Login") {
+            composable<LoginRoute> {
                 LoginScreen(
                     changeMessage = changeMessage,
                     networkService = networkService,
@@ -163,33 +170,26 @@ fun AppNavigation(
                 )
             }
             // TOKEN
-            composable(
-                route = "Token/{email}",
-                arguments = listOf(navArgument("email") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val email = backStackEntry.arguments?.getString("email") ?: ""
+            composable<TokenRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<TokenRoute>()
                 TokenScreen(
-                    email = email,
+                    email = route.email,
                     changeMessage = changeMessage,
                     navigateToHome = { receivedToken ->
-                        currentEmail = email
+                        currentEmail = route.email
                         changeMessage("Token received for $currentEmail")
-                        navController.navigate("Main") {
-                            popUpTo("Main") { inclusive = true }
+                        navController.navigate(MainRoute) {
+                            popUpTo(MainRoute) { inclusive = true }
                         }
                     }
                 )
             }
-            // HOME removed: Menu screen now handles 'home' behavior
             // SHOW CARD
-            composable(
-                route = "ShowCard/{cardId}",
-                arguments = listOf(navArgument("cardId") { type = NavType.IntType })
-            ) { backStackEntry ->
-                val cardId = backStackEntry.arguments?.getInt("cardId") ?: 0
+            composable<ShowCardRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ShowCardRoute>()
                 ShowCardScreen(
                     changeMessage = changeMessage,
-                    cardId = cardId,
+                    cardId = route.cardId,
                     flashCardDao = flashCardDao,
                     networkService = networkService,
                     onCardDeleted = { navController.navigateUp() }
