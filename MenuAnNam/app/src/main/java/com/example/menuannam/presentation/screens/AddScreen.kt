@@ -15,6 +15,26 @@ import androidx.compose.ui.unit.dp
 import com.example.menuannam.data.entity.FlashCard
 
 
+/**
+ * AddScreen - Create new flashcard
+ * User enters English and Vietnamese text, then submits to save
+ *
+ * Flow:
+ * 1. User types English and Vietnamese text in TextFields
+ * 2. Click "Add Card" button
+ * 3. insertFlashCard callback tries to insert to database
+ * 4. Room handles OnConflictStrategy.IGNORE (silently ignores duplicates)
+ * 5. Success message displayed via changeMessage
+ *
+ * Architecture:
+ * - Callback-based design: allows caller (Navigator) to control insert logic
+ * - TextFields persist state (rememberSaveable)
+ * - Semantics allow testing framework to identify elements
+ *
+ * Parameters:
+ * @param changeMessage Updates status bar with feedback
+ * @param insertFlashCard Callback to save card (receives FlashCard)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(

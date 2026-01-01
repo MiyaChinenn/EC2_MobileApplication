@@ -33,6 +33,31 @@ import kotlinx.coroutines.launch
 import com.example.menuannam.data.database.FlashCardDao
 import com.example.menuannam.data.entity.FlashCard
 
+/**
+ * SearchScreen - Browse, search, and manage all flashcards
+ * Displays a searchable list of all cards with edit/delete options
+ *
+ * Flow:
+ * 1. Display all cards in LazyColumn (scrollable list)
+ * 2. User searches by typing in search field
+ * 3. Cards are filtered in real-time by English or Vietnamese text
+ * 4. User taps on card to view details (ShowCardScreen)
+ * 5. User can edit English/Vietnamese inline
+ * 6. User can delete card (removed from database immediately)
+ *
+ * Sub-Composables:
+ * - FlashCardList: Displays cards with edit/delete buttons
+ * - SearchCardsScreen: Main container with search bar and list
+ *
+ * State:
+ * - searchQuery: User's search input
+ * - filteredCards: Cards matching search query (filtered from flashCards)
+ * - editingCardId: Which card is being edited inline
+ *
+ * Database Operations:
+ * - updateFlashCard: Updates card content
+ * - deleteFlashCard: Removes card from database
+ */
 @Composable
 fun FlashCardList(
     selectedItem: (Int) -> Unit,

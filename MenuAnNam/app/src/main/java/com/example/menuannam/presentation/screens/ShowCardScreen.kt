@@ -41,6 +41,37 @@ import com.example.menuannam.data.network.AudioRequest
 import com.example.menuannam.data.network.NetworkService
 import java.io.File
 
+/**
+ * ShowCardScreen - View single flashcard with full details and options
+ * Displays card contents (English and Vietnamese) and provides delete + audio playback
+ *
+ * Flow:
+ * 1. Load card from database by ID (from ShowCardRoute parameter)
+ * 2. Display loading state while fetching
+ * 3. Show English and Vietnamese text in card format
+ * 4. User can click "Play Audio" button to hear Vietnamese pronunciation
+ * 5. User can click "Delete" button to remove card
+ * 6. On delete, return to search screen (navigate back)
+ *
+ * Audio Feature:
+ * - Gets email and token from DataStore
+ * - Calls networkService.generateAudio(word, email, token)
+ * - Lambda returns Base64-encoded MP3
+ * - Decodes and saves using Utils functions (toMd5, saveAudioToInternalStorage)
+ * - ExoPlayer handles playback with state callbacks
+ *
+ * State Management:
+ * - isLoading: Shows loading spinner while fetching card
+ * - errorMessage: Displays errors (card not found, load failed)
+ * - Async card loading via LaunchedEffect
+ *
+ * Parameters:
+ * @param changeMessage Updates status bar
+ * @param cardId Unique ID of card to display
+ * @param flashCardDao Database access for delete operation
+ * @param networkService Retrofit for audio API
+ * @param onCardDeleted Callback to return to search screen
+ */
 @Composable
 fun ShowCardScreen(
     changeMessage: (String) -> Unit = {},

@@ -1,5 +1,31 @@
 package com.example.menuannam
 
+/**
+ * ============================================================
+ * MAIN ACTIVITY - App Entry Point
+ * ============================================================
+ * Initializes all core services and sets up the Compose UI
+ *
+ * Responsibilities:
+ * 1. Initialize Room database (FlashCardDatabase)
+ * 2. Create Retrofit/OkHttpClient for API calls
+ * 3. Set up DataStore for persistent preferences
+ * 4. Initialize Navigation system
+ * 5. Provide CoroutineScope for async operations
+ *
+ * Service Setup:
+ * - Database: FlashCardDatabase.getDatabase() → singleton pattern
+ * - Network: Retrofit with OkHttpClient (30s timeouts)
+ * - DataStore: Stores EMAIL and TOKEN in app preferences
+ * - Navigation: Type-safe Compose Navigation with NavController
+ *
+ * Data Flow:
+ * 1. MainActivity creates all services
+ * 2. Passes them to AppNavigation composable
+ * 3. AppNavigation manages all screens and routing
+ * 4. Screens use dao, networkService, and scope for operations
+ * ============================================================
+ */
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,6 +46,14 @@ import java.util.concurrent.TimeUnit
 val Context.dataStore by preferencesDataStore(name = "user_credentials")
 val TOKEN = stringPreferencesKey("token")
 val EMAIL = stringPreferencesKey("email")
+/**
+ * DataStore setup - Persistent key-value storage for user preferences
+ * val dataStore: DataStore<Preferences> - initialized by delegation
+ * val TOKEN: PreferencesKey<String> - stores authentication token
+ * val EMAIL: PreferencesKey<String> - stores user email
+ *
+ * Accessed via: context.dataStore.data.collect() or context.dataStore.data.first()
+ */
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
