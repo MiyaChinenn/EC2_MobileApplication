@@ -8,18 +8,18 @@ import com.example.menuannam.data.entity.FlashCard
 import kotlin.jvm.Volatile
 
 @Database(entities = [FlashCard::class], version = 1)
-abstract class MenuDatabase : RoomDatabase() {
+abstract class FlashCardDatabase : RoomDatabase() {
     abstract fun flashCardDao(): FlashCardDao
 
     companion object {
         @Volatile
-        private var INSTANCE: MenuDatabase? = null
+        private var INSTANCE: FlashCardDatabase? = null
 
-        fun getDatabase(context: Context): MenuDatabase {
+        fun getDatabase(context: Context): FlashCardDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    MenuDatabase::class.java,
+                    FlashCardDatabase::class.java,
                     "FlashCardDatabase"
                 ).build()
                 INSTANCE = instance

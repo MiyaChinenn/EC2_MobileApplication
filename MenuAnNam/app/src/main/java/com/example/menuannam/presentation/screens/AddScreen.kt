@@ -1,86 +1,89 @@
 package com.example.menuannam.presentation.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import com.example.menuannam.data.database.FlashCardDao
 import com.example.menuannam.data.entity.FlashCard
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
     changeMessage: (String) -> Unit,
-    flashCardDao: FlashCardDao
+    insertFlashCard: (FlashCard) -> Unit
 ) {
-    var enWord by rememberSaveable {mutableStateOf("")}
-    var vnWord by rememberSaveable {mutableStateOf("")}
-    val coroutineScope = rememberCoroutineScope()
-    
+    var english by rememberSaveable { mutableStateOf("") }
+    var vietnamese by rememberSaveable { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
-        changeMessage("Please, add a flash card.")
+        changeMessage("Add a new flashcard")
     }
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = enWord,
-            onValueChange = { enWord = it },
+
+        TextField(
+            value = english,
+            onValueChange = { english = it },
+            label = { Text("English") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { contentDescription = "enTextField" },
-            label = { Text("en") }
+                .semantics { contentDescription = "enTextField" }
         )
-        OutlinedTextField(
-            value = vnWord,
-            onValueChange = { vnWord = it },
+
+        TextField(
+            value = vietnamese,
+            onValueChange = { vietnamese = it },
+            label = { Text("Vietnamese") },
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { contentDescription = "vnTextField" },
-            label = { Text("vn") }
+                .semantics { contentDescription = "viTextField" }
         )
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { contentDescription = "Add" },
-            onClick = {
-                coroutineScope.launch {
-                    try {
-                        flashCardDao.insert(
-                            FlashCard(
-                                uid = 0,
-                                englishCard = enWord,
-                                vietnameseCard = vnWord
-                            )
-                        )
-                        enWord = ""
-                        vnWord = ""
-                        changeMessage("Card added successfully!")
-                    } catch (e: Exception) {
-                        changeMessage("Error: ${e.message}")
-                    }
-                }
-            }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Add")
+            Button(
+                onClick = {
+                    try {
+                        insertFlashCard(FlashCard(0, english, vietnamese))
+                        changeMessage("Flash card successfully added to your database.")
+                        english = ""
+                        vietnamese = ""
+                    } catch (e: Exception) {
+                        changeMessage("Flash card already exists in your database.")
+                    }
+                },
+                modifier = Modifier.semantics { contentDescription = "Add" }
+            ) {
+                Text("Add")
+            }
+
+            Button(
+                onClick = {
+                    english = ""
+                    vietnamese = ""
+                },
+                modifier = Modifier.semantics { contentDescription = "Clear" }
+            ) {
+                Text("Clear")
+            }
         }
     }
 }
