@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.rememberNavController
-import com.example.menuannam.data.database.MenuDatabase
+import com.example.menuannam.data.database.FlashCardDatabase
 import com.example.menuannam.data.network.NetworkService
 import com.example.menuannam.presentation.navigation.AppNavigation
 import com.example.menuannam.ui.theme.MenuAnNamTheme
@@ -30,8 +30,9 @@ class MainActivity : ComponentActivity() {
             MenuAnNamTheme {
                 val navController = rememberNavController()
                 val appContext = applicationContext
+                val scope = rememberCoroutineScope()
 
-                val db = MenuDatabase.getDatabase(appContext)
+                val db = FlashCardDatabase.getDatabase(appContext)
                 val flashCardDao = db.flashCardDao()
 
                 // Create a single OkHttpClient instance with timeouts
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
                 AppNavigation(
                     navController,
                     flashCardDao,
+                    scope,
                     networkService
                 )
             }
