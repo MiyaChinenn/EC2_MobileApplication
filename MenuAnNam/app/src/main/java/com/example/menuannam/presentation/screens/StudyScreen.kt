@@ -41,7 +41,6 @@ import com.example.menuannam.data.database.FlashCardDao
 import com.example.menuannam.data.entity.FlashCard
 import com.example.menuannam.data.network.AudioRequest
 import com.example.menuannam.data.network.NetworkService
-import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -164,7 +163,7 @@ fun StudyScreen(
                                     return@launch
                                 }
                                 changeMessage("Playing audio...")
-                                val resp = networkService.generateAudio(body = AudioRequest(word, email, token))
+                                val resp = networkService.generateAudio(request = AudioRequest(word, email, token))
                                 if (resp.code == 200) {
                                     val audioBytes = Base64.decode(resp.message, Base64.DEFAULT)
                                     val fileName = "${word.toMd5()}.mp3"

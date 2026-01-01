@@ -203,7 +203,7 @@ fun ShowCardScreen(
                                     return@launch
                                 }
                                 val req = AudioRequest(word = word, email = email, token = token)
-                                val resp = networkService.generateAudio(body = req)
+                                val resp = networkService.generateAudio(request = req)
                                 if (resp.code == 200) {
                                     val audioBytes = Base64.decode(resp.message, Base64.DEFAULT)
                                     val fileName = "${word.toMd5()}.mp3"
