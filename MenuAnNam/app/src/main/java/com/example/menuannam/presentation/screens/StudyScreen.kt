@@ -35,13 +35,13 @@ import android.util.Base64
 import com.example.menuannam.EMAIL
 import com.example.menuannam.TOKEN
 import com.example.menuannam.dataStore
+import com.example.menuannam.toMd5
+import com.example.menuannam.saveAudioToInternalStorage
 import com.example.menuannam.data.database.FlashCardDao
 import com.example.menuannam.data.entity.FlashCard
 import com.example.menuannam.data.network.AudioRequest
 import com.example.menuannam.data.network.NetworkService
 import java.io.File
-import java.io.FileOutputStream
-import java.security.MessageDigest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -142,9 +142,8 @@ fun StudyScreen(
                                 val resp = networkService.generateAudio(body = AudioRequest(word, email, token))
                                 if (resp.code == 200) {
                                     val audioBytes = Base64.decode(resp.message, Base64.DEFAULT)
-                                    val hash = MessageDigest.getInstance("MD5").digest(word.toByteArray()).joinToString("") { "%02x".format(it) }
-                                    val file = File(appContext.filesDir, "$hash.mp3")
-                                    FileOutputStream(file).use { it.write(audioBytes) }
+                                    val fileName = "${word.toMd5()}.mp3"
+                                    val file = saveAudioToInternalStorage(appContext, audioBytes, fileName)
                                     val mediaItem = MediaItem.fromUri(file.absolutePath.toUri())
                                     val player = ExoPlayer.Builder(appContext).build()
                                     player.addListener(object : androidx.media3.common.Player.Listener {
