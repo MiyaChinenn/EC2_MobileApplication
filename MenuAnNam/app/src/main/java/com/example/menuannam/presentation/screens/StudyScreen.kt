@@ -45,6 +45,31 @@ import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * StudyScreen - Interactive flashcard learning session
+ * User studies 5 random flashcards and can listen to Vietnamese pronunciation
+ *
+ * Flow:
+ * 1. Load email and token from DataStore
+ * 2. Load random 5 cards from database (shuffled)
+ * 3. Display English word first
+ * 4. User taps to reveal Vietnamese
+ * 5. User can tap "Play Audio" to hear pronunciation via AWS Lambda
+ * 6. Click "Next" to go to next card (reshuffles after completing cycle)
+ *
+ * Audio Feature:
+ * - Uses email and token for API authentication
+ * - Calls networkService.generateAudio(word, email, token)
+ * - Lambda returns Base64-encoded MP3
+ * - Decodes and saves to internal storage with MD5 hash filename
+ * - ExoPlayer plays the audio file
+ *
+ * State Management:
+ * - lesson: current 5 cards loaded from database
+ * - currentIndex: current card position in lesson
+ * - showVietnamese: toggle English/Vietnamese display
+ * - LocalContext provides application context for file/DataStore access
+ */
 @Composable
 fun StudyScreen(
     changeMessage: (String) -> Unit = {},

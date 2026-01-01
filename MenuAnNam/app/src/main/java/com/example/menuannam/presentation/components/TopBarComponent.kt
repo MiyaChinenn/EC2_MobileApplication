@@ -12,6 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 
+/**
+ * TopBarComponent - Top app bar with title and optional back button
+ * Displays current screen title and navigation controls
+ *
+ * Features:
+ * - CenterAlignedTopAppBar: Material 3 standard top bar
+ * - Dynamic title: Changes based on current route
+ * - Conditional back button: Shows on all screens except HomeRoute
+ * - Semantic contentDescription: Enables testing framework to find elements
+ *
+ * Parameters:
+ * @param title Screen name to display (e.g., "Study Cards", "Add Card")
+ * @param showBack Optional callback to navigate up - if null, no back button shown
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarComponent(

@@ -25,6 +25,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * LoginScreen - Get user email for authentication
+ * First step of login workflow: collect email, send to Lambda for token
+ *
+ * Flow:
+ * 1. User enters email address
+ * 2. Click "Login" button
+ * 3. networkService.generateToken() sends email to AWS Lambda
+ * 4. Lambda validates email and returns authentication token
+ * 5. Token is saved to DataStore
+ * 6. Navigate to TokenScreen with token string
+ *
+ * API Integration:
+ * - Retrofit call: generateToken(email: UserCredential) -> TokenResponse
+ * - Response code 200 means success, token in response.message
+ * - Handles network errors gracefully with try/catch
+ *
+ * Parameters:
+ * @param changeMessage Updates status bar with feedback
+ * @param networkService Retrofit interface for Lambda API
+ * @param navigateToToken Callback to show token entry screen with email
+ */
 @Composable
 fun LoginScreen(
     changeMessage: (String) -> Unit,

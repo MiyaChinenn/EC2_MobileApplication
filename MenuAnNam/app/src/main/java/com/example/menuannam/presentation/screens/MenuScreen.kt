@@ -28,14 +28,30 @@ import com.example.menuannam.dataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * MenuScreen / Main Menu - Home page of the app
+ * Displays 4 main action buttons to navigate to different features
+ *
+ * Flow:
+ * 1. Load stored email from DataStore on startup
+ * 2. Display email (shows user is logged in if email exists)
+ * 3. User taps button to navigate to Study/Add/Search/Login screen
+ *
+ * UI Elements:
+ * - Study Cards: Start learning session with 5 random cards
+ * - Add Card: Create new flashcard
+ * - Search Cards: Browse and manage existing cards
+ * - Login: Get authentication token for audio feature
+ * - Logout: Clear stored email/token
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuAnNam(
-    onStudy: () -> Unit,
-    onAdd: () -> Unit,
-    onSearch: () -> Unit,
-    onLogin: () -> Unit,
-    changeMessage: (String) -> Unit = {}
+    onStudy: () -> Unit,       // Callback to navigate to StudyCardsRoute
+    onAdd: () -> Unit,         // Callback to navigate to AddCardRoute
+    onSearch: () -> Unit,      // Callback to navigate to SearchCardsRoute
+    onLogin: () -> Unit,       // Callback to navigate to LoginRoute
+    changeMessage: (String) -> Unit = {}  // Update bottom status bar
 ) {
     val context = LocalContext.current
     val appContext = context.applicationContext
@@ -43,6 +59,11 @@ fun MenuAnNam(
 
     var email by remember { mutableStateOf("") }
 
+    /**
+     * Load saved email from DataStore on screen load
+     * Shows user they are logged in (if email is stored)
+     * Runs once when composable enters composition
+     */
     LaunchedEffect(Unit) {
         val prefs = appContext.dataStore.data.first()
         email = prefs[EMAIL] ?: ""
