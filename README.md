@@ -2,6 +2,12 @@
 
 This branch contains the full Elective2-Mobile workspace, including the MenuAnNam Android flashcard app and course PDF.
 
+## Project Description
+- Built a Kotlin flashcard learning app with Jetpack Compose UI, REST APIs, and DataStore auth for AWS Lambda TTS.
+- Room Database + DAO for flashcard CRUD, Retrofit for token/audio generation, and ExoPlayer for MP3 playback.
+- Added email/token login, Base64 audio decoding, MD5-hashed file caching, type-safe navigation, and randomized study sessions.
+- Stack: Kotlin, Jetpack Compose, Room, Retrofit, DataStore, ExoPlayer, AWS Lambda, Coroutines, Gradle.
+
 ## Contents
 - `MenuAnNam/` – Android Studio project for the Menu An Nam flashcard app
 - `MenuAnNam.zip` – zipped copy of the same project (optional; you can ignore or remove if using Git LFS)
