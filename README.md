@@ -1,4 +1,4 @@
-# EC2 Mobile Application (master branch)
+# EC2 Mobile Application
 
 This branch contains the full Elective2-Mobile workspace, including the MenuAnNam Android flashcard app and course PDF.
 
