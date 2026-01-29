@@ -1,0 +1,361 @@
+\documentclass[a4paper,10pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.4in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{amssymb} % For \checkmark
+
+% Code listing style for Kotlin
+\lstdefinelanguage{Kotlin}{
+  keywords={package, import, class, interface, fun, val, var, if, else, when, for, while, do, return, break, continue, object, companion, data, sealed, abstract, open, override, private, public, protected, internal, enum, suspend, try, catch, finally, throw, @Composable, @Query, @Insert, @Update, @Delete, @Dao, @Database, @Entity, @PrimaryKey, @ColumnInfo, @Serializable, @OptIn},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={String, Int, Boolean, Unit, List, Array, Map, Set, Flow, MutableStateOf, remember, LaunchedEffect, ViewModel, Context},
+  ndkeywordstyle=\color{purple}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{gray},
+    deletekeywords={...},
+    escapeinside={\%*}{*)},
+    extendedchars=true,
+    frame=none,
+    keepspaces=true,
+    keywordstyle=\color{blue},
+    language=Kotlin,
+    numbers=left,
+    numbersep=3pt,
+    numberstyle=\tiny\color{gray},
+    rulecolor=\color{black},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    stepnumber=1,
+    firstnumber=1,
+    stringstyle=\color{red},
+    tabsize=2,
+    title=\lstname,
+    literate={→}{->}1,
+    xleftmargin=5pt,
+    xrightmargin=5pt,
+    aboveskip=2pt,
+    belowskip=2pt
+}
+
+\title{MenuAnNam - Mobile Application\\Source Code Documentation}
+\author{Nguyen Thien Nguyen - 10422059}
+\date{\today}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{MenuAnNam - Mobile Computing}
+\lhead{Source Code Documentation}
+\cfoot{\thepage}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\chapter{Overview}
+
+\section{Project Description}
+MenuAnNam is an Android mobile application built with Jetpack Compose for learning Vietnamese vocabulary through flashcards. The app integrates with AWS Lambda services for authentication and audio synthesis, uses Room database for local storage, and implements modern Android architecture patterns.
+
+\section{Technology Stack}
+\begin{itemize}
+    \item \textbf{UI Framework:} Jetpack Compose with Material 3
+    \item \textbf{Language:} Kotlin
+    \item \textbf{Database:} Room (SQLite)
+    \item \textbf{Networking:} Retrofit 2 with OkHttp
+    \item \textbf{Data Storage:} DataStore Preferences
+    \item \textbf{Audio Playback:} ExoPlayer (Media3)
+    \item \textbf{Navigation:} Type-safe Compose Navigation
+    \item \textbf{Backend:} AWS Lambda Functions
+\end{itemize}
+
+\section{AWS Lambda Integration}
+\begin{itemize}
+    \item \textbf{Token Generation:} \url{https://egsbwqh7kildllpkijk6nt4soq0wlgpe.lambda-url.ap-southeast-1.on.aws/}
+    \item \textbf{Audio Synthesis:} \url{https://ityqwv3rx5vifjpyufgnpkv5te0ibrcx.lambda-url.ap-southeast-1.on.aws/}
+\end{itemize}
+
+\chapter{Application Entry Point}
+
+\section{MainActivity.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/MainActivity.kt}
+\end{multicols}
+
+\section{Utils.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/Utils.kt}
+\end{multicols}
+
+\chapter{Data Layer}
+
+\section{Database}
+
+\subsection{FlashCardDao.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/data/database/FlashCardDao.kt}
+\end{multicols}
+
+\subsection{MenuDatabase.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/data/database/MenuDatabase.kt}
+\end{multicols}
+
+\section{Entity}
+
+\subsection{FlashCard.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/data/entity/FlashCard.kt}
+\end{multicols}
+
+\section{Network}
+
+\subsection{DataTypes.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/data/network/DataTypes.kt}
+\end{multicols}
+
+\subsection{NetworkService.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/data/network/NetworkService.kt}
+\end{multicols}
+
+\chapter{Presentation Layer}
+
+\section{Navigation}
+
+\subsection{Navigator.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/navigation/Navigator.kt}
+\end{multicols}
+
+\subsection{Routes.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/navigation/Routes.kt}
+\end{multicols}
+
+\section{Components}
+
+\subsection{TopBarComponent.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/components/TopBarComponent.kt}
+\end{multicols}
+
+\subsection{BottomBarComponent.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/components/BottomBarComponent.kt}
+\end{multicols}
+
+\newpage
+\section{Screens}
+
+\subsection{MenuScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/MenuScreen.kt}
+\end{multicols}
+
+\subsection{LoginScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/LoginScreen.kt}
+\end{multicols}
+
+\subsection{TokenScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/TokenScreen.kt}
+\end{multicols}
+
+\newpage
+\subsection{AddScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/AddScreen.kt}
+\end{multicols}
+
+\newpage
+\subsection{FilterScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/FilterScreen.kt}
+\end{multicols}
+
+\newpage
+\subsection{SearchScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/SearchScreen.kt}
+\end{multicols}
+
+\newpage
+\subsection{EditScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/EditScreen.kt}
+\end{multicols}
+
+\newpage
+\subsection{StudyScreen.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/presentation/screens/StudyScreen.kt}
+\end{multicols}
+
+\chapter{UI Theme}
+
+\section{Color.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/ui/theme/Color.kt}
+\end{multicols}
+
+\section{Theme.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/ui/theme/Theme.kt}
+\end{multicols}
+
+\section{Type.kt}
+\begin{multicols}{2}
+\lstinputlisting[language=Kotlin]{./app/src/main/java/com/example/menuannam/ui/theme/Type.kt}
+\end{multicols}
+
+\chapter{Build Configuration}
+
+\section{build.gradle.kts (App Module)}
+\lstinputlisting[language=Kotlin]{./app/build.gradle.kts}
+
+\section{libs.versions.toml}
+\lstinputlisting{./gradle/libs.versions.toml}
+
+\chapter{Mobile Application Use Cases \& Implementation}
+
+\section{Use Cases Implementation Status}
+
+\subsection{1. Request an Authentication Token}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can request a token (for authentication) by providing his/her email address. The token will be sent to the user's provided email address.
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screen:} LoginScreen.kt
+        \item \textbf{Lambda API:} Token Generation Endpoint
+        \item \textbf{Flow:} User enters email → API call to Lambda → Token sent to email → User receives token
+    \end{itemize}
+    \item \textbf{Code Location:} LoginScreen.kt; NetworkService.kt; DataTypes.kt
+\end{itemize}
+
+\subsection{2. Save the Pair Email Address/Authentication Token in the App}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can save the authentication token and the corresponding email address in the app's preferences datastore.
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screen:} TokenScreen.kt
+        \item \textbf{Storage:} DataStore Preferences (EMAIL and TOKEN keys)
+        \item \textbf{Flow:} User enters token from email → Click save → Both email and token persisted in DataStore
+    \end{itemize}
+    \item \textbf{Code Location:} TokenScreen.kt; MainActivity.kt (DataStore Setup)
+\end{itemize}
+
+\subsection{3. Add a Flashcard}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can add a flashcard to the app's (Room) database by providing the corresponding English and Vietnamese words. The (Room) database should not store duplicated flashcards. If the user requests to add a flashcard that already exists in the (Room) database, the app will refuse to do so and will inform the user accordingly. After the user successfully adds a flashcard to the (Room) database, the user should be allowed to continue adding more flashcards until he/she decides not to do so (e.g., when the user clicks on a "back" button).
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screen:} AddScreen.kt
+        \item \textbf{Database:} FlashCard entity with unique index on (english\_card, vietnamese\_card)
+        \item \textbf{Strategy:} OnConflictStrategy.IGNORE prevents duplicates
+        \item \textbf{User Feedback:} App informs user if duplicate exists
+        \item \textbf{UI:} Clear button resets fields, Back button available for navigation
+        \item \textbf{Continue Adding:} User can add multiple flashcards without leaving the screen
+    \end{itemize}
+    \item \textbf{Code Location:} AddScreen.kt; FlashCard.kt; FlashCardDao.kt (Insert Methods)
+\end{itemize}
+
+\subsection{4. Search Flashcards}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can search the flashcards stored in the app's (Room) database using "filters". For each search, the user can specify one of the following filters:
+    \begin{enumerate}
+        \item[a)] The flashcard's English word should match exactly the English word provided by the user and the flashcard's Vietnamese word should match exactly the Vietnamese word provided by the user.
+        \item[b)] The flashcard's English word should match exactly the English word provided by the user and the flashcard's Vietnamese word should contain the Vietnamese word provided by the user.
+        \item[c)] The flashcard's Vietnamese word should match exactly the Vietnamese word provided by the user and the flashcard's English word should contain the English word provided by the user.
+        \item[d)] The flashcard's English word and the flashcard's Vietnamese word should contain, respectively, the English word and the Vietnamese word provided by the user.
+    \end{enumerate}
+    When requested to do so (e.g., when the user clicks on a "search" button), the app will show in a table the flashcards that satisfy the "filter" specified by the user. Each row in the table will contain an "edit" button that allows the user to Edit the corresponding flashcard.
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screens:} FilterScreen.kt (search form), SearchScreen.kt (results table)
+        \item \textbf{Database Query:} CASE WHEN logic in FlashCardDao.getFilteredFlashCards()
+        \item \textbf{UI:} Checkboxes for exact/partial match per field
+        \item \textbf{Results Display:} LazyColumn table with Edit button per row
+    \end{itemize}
+    \item \textbf{Code Location:} FilterScreen.kt; SearchScreen.kt; FlashCardDao.kt (Filter Query)
+\end{itemize}
+
+\subsection{5. Edit a Flashcard}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can edit a flashcard. When editing a flashcard, the app will initially show the flashcard's English and Vietnamese words as they are stored in the app's (Room) database, and the name of the file in the app's internal storage containing the audio corresponding to the pronunciation of the flashcard's Vietnamese word (if exists). Afterwards:
+    \begin{itemize}
+        \item The user can update the flashcard's English and Vietnamese words in the (Room) database by providing the new English and Vietnamese words.
+        \item The user can delete the audio file shown in the editing-screen.
+        \item If no audio file is shown in the editing-screen, if the user is authenticated, he/she can request the audio file corresponding to the pronunciation of the Vietnamese word shown in the editing-screen, and save it in the internal storage.
+        \item If an audio file is shown in the editing screen, the user can play it on his/her device.
+    \end{itemize}
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screen:} EditScreen.kt
+        \item \textbf{Initial Display:} Shows English/Vietnamese words and audio filename (if exists)
+        \item \textbf{Update Feature:} Update button saves changes to Room database
+        \item \textbf{Delete Audio:} Clean audio button removes file from internal storage
+        \item \textbf{Generate Audio:} Generate audio button (shown if no audio exists and user authenticated)
+        \item \textbf{Play Audio:} Play audio button (shown if audio file exists)
+        \item \textbf{Audio Storage:} Internal app storage with MD5 hash filenames
+        \item \textbf{Audio Player:} ExoPlayer (Media3)
+        \item \textbf{Lambda API:} Audio Synthesis Endpoint
+    \end{itemize}
+    \item \textbf{Code Location:} EditScreen.kt; Utils.kt; FlashCardDao.kt (Update and GetById Methods); NetworkService.kt; DataTypes.kt
+\end{itemize}
+
+\subsection{6. Study Flashcards}
+\begin{itemize}
+    \item[\checkmark] \textbf{Status:} Implemented
+    \item \textbf{Requirement:} The user can request the app to create a "lesson" for him/her to study. A lesson is a group of 3 flashcards randomly chosen from the app's (Room) database. When studying a lesson, the app will show first the flashcard's English word. Then, if the user asks to see the flashcard's Vietnamese word (e.g., by clicking on the flashcard's English word), the flashcard's Vietnamese word will be shown. When the Vietnamese word is shown:
+    \begin{itemize}
+        \item The user can move to study the "next" flashcard in the lesson (in a loop).
+        \item The user can play the audio file corresponding to the pronunciation of the flashcard's Vietnamese word, if exists in the app's internal storage.
+        \item If the audio file corresponding to the pronunciation of the flashcard's Vietnamese word does not exist in the app's internal storage, if the user is authenticated, he/she can request the audio, and save it in his/her app's internal storage.
+    \end{itemize}
+    \item \textbf{Implementation:}
+    \begin{itemize}
+        \item \textbf{Screen:} StudyScreen.kt
+        \item \textbf{Lesson Size:} 3 flashcards randomly chosen from Room database
+        \item \textbf{Mode:} STUDY\_SESSION enum value
+        \item \textbf{Initial Display:} Shows English word first
+        \item \textbf{Reveal Mechanism:} Tap card to reveal Vietnamese word
+        \item \textbf{Navigation:} Next button moves to next flashcard (loops back to first)
+        \item \textbf{Play Audio:} Play audio button (if audio exists in internal storage)
+        \item \textbf{Generate Audio:} Generate audio button (if authenticated and audio doesn't exist)
+        \item \textbf{Audio Caching:} Checks local cache first, then API fallback
+        \item \textbf{Audio Helpers:} Utils.kt provides `toMd5`, `getCachedAudioFile`, and `saveAudioToInternalStorage` used by StudyScreen playback/generation
+        \item \textbf{Audio Playback:} ExoPlayer with state callbacks
+    \end{itemize}
+    \item \textbf{Code Location:} StudyScreen.kt; FlashCardDao.kt (GetAll Method); Utils.kt; NetworkService.kt; DataTypes.kt
+\end{itemize}
+
+\end{document}

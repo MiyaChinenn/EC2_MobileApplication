@@ -1,0 +1,445 @@
+\documentclass[a4paper,11pt,openany]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+% Prevent page breaks before chapters
+\titleformat{\chapter}[hang]{\huge\bfseries}{\thechapter}{20pt}{\huge\bfseries}
+\titlespacing*{\chapter}{0pt}{-10pt}{10pt}
+
+\title{MenuAnNam Mobile App — Code Notes}
+\author{Nguyen Thien Nguyen - 10422059}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\chapter{Use Case: Request Authentication Token}
+
+\section{LoginScreen.kt}
+\textbf{Purpose:} Request token from Lambda; send token to email.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{27--31}; state at line \textbf{34}; coroutine scope at line \textbf{35}.
+  \item UI layout: lines \textbf{41--43} Column container; email TextField at lines \textbf{45--53}.
+  \item Submit button: lines \textbf{55--77} launches coroutine; calls `networkService.generateToken()` at lines \textbf{59--61}.
+  \item Response handling: lines \textbf{62--65} navigate on success; lines \textbf{66--68} display error; lines \textbf{70--72} exception catch.
+\end{itemize}
+
+\section{NetworkService.kt}
+\textbf{Purpose:} Retrofit interface with Lambda endpoints.
+\begin{itemize}[leftmargin=*]
+  \item Interface: line \textbf{8} with suspend functions.
+  \item Token endpoint: lines \textbf{10--14} `@PUT` at line \textbf{12} `https://egsbwqh7kildllpkijk6nt4soq0wlgpe.lambda-url.ap-southeast-1.on.aws/`.
+  \item Audio endpoint: lines \textbf{17--21} `@PUT` at line \textbf{18} `https://ityqwv3rx5vifjpyufgnpkv5te0ibrcx.lambda-url.ap-southeast-1.on.aws/`.
+\end{itemize}
+
+\section{DataTypes.kt}
+\textbf{Purpose:} Serializable data classes for Lambda payloads.
+\begin{itemize}[leftmargin=*]
+  \item UserCredential: line \textbf{8} email field.
+  \item TokenResponse: lines \textbf{11--14} code and message.
+  \item AudioRequest: lines \textbf{17--21} word, email, token fields.
+  \item AudioResponse: lines \textbf{24--27} code and Base64 MP3 or error.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item LoginRoute: line \textbf{26} object for authentication screen.
+  \item TokenRoute: line \textbf{35} data class with email parameter.
+\end{itemize}
+
+\section{Navigator.kt (Login Route)}
+\textbf{Purpose:} Route implementation and navigation.
+\begin{itemize}[leftmargin=*]
+  \item LoginRoute composable: lines \textbf{111--122} instantiates LoginScreen with networkService; navigateToToken callback at line \textbf{118}.
+\end{itemize}
+
+\nopagebreak
+\chapter{Use Case: Save Email/Token Pair}
+
+\section{TokenScreen.kt}
+\textbf{Purpose:} Save email/token pair to DataStore after token received.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{31--35}; coroutine scope at line \textbf{36}; context at lines \textbf{37--38}; token state at line \textbf{39}.
+  \item UI layout: lines \textbf{45--50} Column; token TextField at lines \textbf{52--59}; email TextField at lines \textbf{60--67}.
+  \item Save button: lines \textbf{64--75} launches coroutine at line \textbf{68}.
+  \item DataStore save: lines \textbf{69--74} `dataStore.edit` saves EMAIL and TOKEN keys.
+  \item Navigation: line \textbf{80} calls `navigateToHome(token)`.
+\end{itemize}
+
+\section{MainActivity.kt (DataStore Setup)}
+\textbf{Purpose:} Initialize DataStore singleton and credential keys.
+\begin{itemize}[leftmargin=*]
+  \item DataStore delegate: line \textbf{17} `preferencesDataStore(name = "user\_credentials")`.
+  \item TOKEN key: line \textbf{18} `stringPreferencesKey("token")`.
+  \item EMAIL key: line \textbf{19} `stringPreferencesKey("email")`.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item TokenRoute: line \textbf{35} data class with email parameter.
+  \item HomeRoute: line \textbf{9} object for main menu.
+\end{itemize}
+
+\section{Navigator.kt (Token Route)}
+\textbf{Purpose:} Route implementation and navigation.
+\begin{itemize}[leftmargin=*]
+  \item TokenRoute composable: lines \textbf{228--243} extracts email parameter at line \textbf{232}; navigateToHome callback at lines \textbf{236--240}.
+\end{itemize}
+
+\chapter{Use Case: Add Flashcard}
+
+\section{AddScreen.kt}
+\textbf{Purpose:} Insert flashcard with Room IGNORE strategy for duplicate prevention.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{18--22}; state variables at lines \textbf{23--24}.
+  \item UI layout: lines \textbf{30--37} Column; English TextField at lines \textbf{39--47}; Vietnamese TextField at lines \textbf{49--57}.
+  \item Add button: lines \textbf{65--80} try-catch block; calls `insertFlashCard(FlashCard(0, english, vietnamese))` at line \textbf{68}; handles duplicates at lines \textbf{72--74}.
+  \item Clear button: lines \textbf{82--90} resets fields at lines \textbf{84--85}.
+\end{itemize}
+
+\section{FlashCard.kt}
+\textbf{Purpose:} Room entity with unique constraint on English/Vietnamese pair.
+\begin{itemize}[leftmargin=*]
+  \item Entity: lines \textbf{10--13} `@Entity` with unique index on english\_card and vietnamese\_card.
+  \item Data class: line \textbf{15} `FlashCard` with uid, englishCard, vietnameseCard.
+\end{itemize}
+
+\section{FlashCardDao.kt (Insert Methods)}
+\textbf{Purpose:} DAO with IGNORE strategy for duplicates.
+\begin{itemize}[leftmargin=*]
+  \item Interface: line \textbf{14} `@Dao interface FlashCardDao`.
+  \item Insert single: lines \textbf{34--35} `@Insert(onConflict = IGNORE)`; returns row id or -1.
+  \item Insert batch: lines \textbf{37--38} `insertAll(vararg flashCard: FlashCard)`.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item AddCardRoute: line \textbf{12} object for add flashcard screen.
+\end{itemize}
+
+\section{Navigator.kt (Add Route)}
+\textbf{Purpose:} Route implementation with insertFlashCard callback.
+\begin{itemize}[leftmargin=*]
+  \item AddCardRoute composable: lines \textbf{137--151} instantiates AddScreen; insertFlashCard callback at lines \textbf{140--147} calls `flashCardDao.insertAll()` at line \textbf{143}.
+\end{itemize}
+
+\section{MenuDatabase.kt}
+\textbf{Purpose:} Room database singleton.
+\begin{itemize}[leftmargin=*]
+  \item Database annotation: line \textbf{12} `@Database` with FlashCard entity.
+  \item Singleton: lines \textbf{20--30} `getDatabase()` with double-checked locking.
+\end{itemize}
+
+\chapter{Use Case: Search Flashcards}
+
+\section{FilterScreen.kt}
+\textbf{Purpose:} Capture search filters with 4 exact/partial match combinations.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{26--29}; state variables at lines \textbf{30--33}.
+  \item UI layout: lines \textbf{39--46} Column; English row at lines \textbf{48--66}; Vietnamese row at lines \textbf{68--84}.
+  \item Search button: lines \textbf{89--106}; converts booleans to 0/1 at lines \textbf{94--95}; calls onSearch at lines \textbf{97--98}.
+\end{itemize}
+
+\section{SearchScreen.kt}
+\textbf{Purpose:} Display filtered flashcards in LazyColumn with Edit and Delete buttons.
+\begin{itemize}[leftmargin=*]
+  \item FlashCardList component: lines \textbf{39--90} LazyColumn with card rows; Edit button at lines \textbf{73--79}; Delete button at lines \textbf{80--85}.
+  \item SearchScreen composable: lines \textbf{93--106}; state at lines \textbf{107--109}; coroutine scope at line \textbf{110}.
+  \item performSearch lambda: lines \textbf{112--124} calls `flashCardDao.getFilteredFlashCards()` at line \textbf{116}.
+  \item UI layout: lines \textbf{130--137} Column; loading state at lines \textbf{139--141}.
+  \item FlashCardList call: lines \textbf{144--153} onDelete handler calls `flashCardDao.delete()` and refreshes.
+\end{itemize}
+
+\section{FlashCardDao.kt (Filter Query)}
+\textbf{Purpose:} Execute parameterized CASE WHEN query for 4 filter combinations.
+\begin{itemize}[leftmargin=*]
+  \item Query method: lines \textbf{52--82} `@Query` with SQL CASE WHEN logic for exact/partial match.
+  \item Parameters: `englishText`, `exactEnglish`, `vietnameseText`, `exactVietnamese`.
+  \item Return: `List<FlashCard>` with matching records.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item FilterRoute: line \textbf{38} object for search input screen.
+  \item SearchCardsRoute: lines \textbf{18--23} data class with 4 search parameters.
+  \item EditCardRoute: line \textbf{32} data class with cardId.
+\end{itemize}
+
+\section{Navigator.kt (Search Routes)}
+\textbf{Purpose:} Route implementations for filter and search.
+\begin{itemize}[leftmargin=*]
+  \item FilterRoute composable: lines \textbf{166--177} instantiates FilterScreen; onSearch callback at lines \textbf{169--176} navigates to SearchCardsRoute.
+  \item SearchCardsRoute composable: lines \textbf{153--181} extracts route parameters at line \textbf{154}; passes to SearchScreen; onEdit callback at line \textbf{160} navigates to EditCardRoute.
+\end{itemize}
+
+\chapter{Use Case: Edit Flashcard}
+
+\section{EditScreen.kt}
+\textbf{Purpose:} Update flashcard text and manage audio files.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{43--48}; context and scope at lines \textbf{49--51}; state at lines \textbf{53--58}.
+  \item Load flashcard: lines \textbf{60--88} `LaunchedEffect` fetches card at line \textbf{62}; checks audio at lines \textbf{69--74}.
+  \item UI layout: lines \textbf{110--289} Column with TextFields at lines \textbf{113--131}.
+  \item Update button: lines \textbf{147--167} calls `flashCardDao.update()` at lines \textbf{151--155}.
+  \item Clean audio: lines \textbf{169--195} deletes file at line \textbf{175}.
+  \item Play audio: lines \textbf{197--233} creates ExoPlayer at line \textbf{204}; plays at lines \textbf{220--221}.
+  \item Generate audio: lines \textbf{235--289} loads credentials at lines \textbf{240--243}; calls `networkService.generateAudio()` at lines \textbf{250--253}; decodes Base64 at line \textbf{256}; saves with MD5 filename at lines \textbf{257--258}.
+\end{itemize}
+
+\section{Utils.kt}
+\textbf{Purpose:} MD5 hashing, audio storage, cache checking.
+\begin{itemize}[leftmargin=*]
+  \item MD5 extension: lines \textbf{9--12} converts string to MD5 hex digest.
+  \item Save audio: lines \textbf{15--21} writes bytes to internal storage; returns File.
+  \item Cache check: lines \textbf{24--27} checks if `\$\{word.toMd5()\}.mp3` exists; returns File or null.
+\end{itemize}
+
+\section{FlashCardDao.kt (Update and GetById Methods)}
+\textbf{Purpose:} Update flashcard and fetch by ID.
+\begin{itemize}[leftmargin=*]
+  \item Update: lines \textbf{40--50} `@Query` UPDATE statement with id, english, vietnamese parameters.
+  \item GetById: line \textbf{28} `SELECT WHERE uid = :id`; returns nullable FlashCard.
+  \item Delete: lines \textbf{29--30} `@Delete` method.
+\end{itemize}
+
+\section{NetworkService.kt}
+\textbf{Purpose:} Retrofit interface for audio synthesis.
+\begin{itemize}[leftmargin=*]
+  \item Audio endpoint: lines \textbf{16--20} `@PUT` with audio synthesis URL.
+\end{itemize}
+
+\section{DataTypes.kt}
+\textbf{Purpose:} Audio API payloads.
+\begin{itemize}[leftmargin=*]
+  \item AudioRequest: lines \textbf{16--20} word, email, token fields.
+  \item AudioResponse: lines \textbf{23--26} code and Base64 MP3.
+\end{itemize}
+
+\section{MainActivity.kt (DataStore)}
+\textbf{Purpose:} DataStore for EMAIL/TOKEN credentials.
+\begin{itemize}[leftmargin=*]
+  \item DataStore delegate: line \textbf{17} singleton.
+  \item TOKEN key: line \textbf{18} for audio authentication.
+  \item EMAIL key: line \textbf{19} for audio authentication.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item EditCardRoute: line \textbf{32} data class with cardId.
+\end{itemize}
+
+\section{Navigator.kt (Edit Route)}
+\textbf{Purpose:} Route implementation.
+\begin{itemize}[leftmargin=*]
+  \item EditCardRoute composable: lines \textbf{183--197} extracts cardId at line \textbf{184}; passes networkService and flashCardDao; onCardUpdated callback at line \textbf{189}.
+\end{itemize}
+
+\chapter{Use Case: Study Flashcards}
+
+\section{StudyScreen.kt}
+\textbf{Purpose:} Random lesson generation, card flip, audio playback with caching.
+\begin{itemize}[leftmargin=*]
+  \item CardViewMode enum: lines \textbf{53--56} SINGLE\_CARD and STUDY\_SESSION modes.
+  \item Composable function: lines \textbf{60--68}; state at lines \textbf{71--76}.
+  \item Load data: lines \textbf{78--114} `LaunchedEffect`; SINGLE\_CARD at lines \textbf{82--91}; STUDY\_SESSION at lines \textbf{92--105} creates 3-card lesson at lines \textbf{94--98}.
+  \item playAudio lambda: lines \textbf{116--203} cache check at lines \textbf{124--125}; cached playback at lines \textbf{126--149}; load credentials at lines \textbf{150--157}; API call at lines \textbf{161--164}; decode and save at lines \textbf{167--169}; ExoPlayer at lines \textbf{171--190}.
+  \item SINGLE\_CARD UI: lines \textbf{224--287} card display at lines \textbf{226--264}; Delete button at lines \textbf{269--282}; Play button at lines \textbf{284--288}.
+  \item STUDY\_SESSION UI: lines \textbf{289--358} flip card at lines \textbf{294--316}; Next button at lines \textbf{318--330}; Play button at lines \textbf{332--341}.
+\end{itemize}
+
+\section{Utils.kt}
+\textbf{Purpose:} Audio cache management.
+\begin{itemize}[leftmargin=*]
+  \item MD5: lines \textbf{9--12} generates hex filenames.
+  \item Save: lines \textbf{15--21} persists MP3 bytes.
+  \item Cache check: lines \textbf{24--27} returns File or null.
+\end{itemize}
+
+\section{FlashCardDao.kt (GetAll and GetById Methods)}
+\textbf{Purpose:} Fetch flashcards for lesson generation and single card view.
+\begin{itemize}[leftmargin=*]
+  \item GetAll: line \textbf{19} `SELECT * FROM FlashCards`; returns all cards.
+  \item GetById: line \textbf{28} `SELECT WHERE uid = :id`; returns nullable FlashCard.
+  \item Delete: lines \textbf{29--30} `@Delete` for SINGLE\_CARD mode.
+\end{itemize}
+
+\section{NetworkService.kt}
+\textbf{Purpose:} Retrofit interface for audio synthesis.
+\begin{itemize}[leftmargin=*]
+  \item Audio endpoint: lines \textbf{16--20} `@PUT` with audio synthesis URL.
+\end{itemize}
+
+\section{DataTypes.kt}
+\textbf{Purpose:} Audio API payloads.
+\begin{itemize}[leftmargin=*]
+  \item AudioRequest: lines \textbf{16--20} word, email, token fields.
+  \item AudioResponse: lines \textbf{23--26} code and Base64 MP3.
+\end{itemize}
+
+\section{MainActivity.kt (DataStore)}
+\textbf{Purpose:} DataStore for EMAIL/TOKEN credentials.
+\begin{itemize}[leftmargin=*]
+  \item DataStore delegate: line \textbf{17} singleton.
+  \item TOKEN key: line \textbf{18} for audio authentication.
+  \item EMAIL key: line \textbf{19} for audio authentication.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Navigation route definitions.
+\begin{itemize}[leftmargin=*]
+  \item StudyCardsRoute: line \textbf{15} object for study session.
+  \item ShowCardRoute: line \textbf{29} data class with cardId for single card view.
+\end{itemize}
+
+\section{Navigator.kt (Study Routes)}
+\textbf{Purpose:} Route implementations.
+\begin{itemize}[leftmargin=*]
+  \item StudyCardsRoute composable: lines \textbf{124--135} instantiates StudyScreen in STUDY\_SESSION mode; passes networkService and coroutineScope.
+  \item ShowCardRoute composable: lines \textbf{210--227} extracts cardId at line \textbf{211}; instantiates StudyScreen in SINGLE\_CARD mode; onCardDeleted callback at line \textbf{218}.
+\end{itemize}
+
+\chapter{Use Case: Audio Cache \& Regeneration}
+
+\section{Utils.kt}
+\textbf{Purpose:} Audio caching with deterministic filenames.
+\begin{itemize}[leftmargin=*]
+  \item MD5 extension: lines \textbf{8--11} converts word to 32-char hex digest for cache consistency.
+  \item Save audio: lines \textbf{14--20} writes Base64-decoded MP3 to internal storage.
+  \item Cache check: lines \textbf{23--26} checks if `\$\{word.toMd5()\}.mp3` exists; returns File or null.
+\end{itemize}
+
+\section{NetworkService.kt (Audio Endpoint)}
+\textbf{Purpose:} Retrofit interface for Lambda audio synthesis.
+\begin{itemize}[leftmargin=*]
+  \item Audio endpoint: lines \textbf{16--20} `@PUT` at line \textbf{17} with default URL.
+\end{itemize}
+
+\section{DataTypes.kt (Audio Payloads)}
+\textbf{Purpose:} Request/response for audio endpoint.
+\begin{itemize}[leftmargin=*]
+  \item AudioRequest: lines \textbf{16--20} word, email, token fields.
+  \item AudioResponse: lines \textbf{23--26} code and Base64 MP3 or error.
+\end{itemize}
+
+\section{EditScreen.kt (Audio Cache Flow)}
+\textbf{Purpose:} Cache-check-then-fetch pattern.
+\begin{itemize}[leftmargin=*]
+  \item Generate audio: lines \textbf{235--289} loads credentials at lines \textbf{240--243}; calls `networkService.generateAudio()` at lines \textbf{250--253}; decodes Base64 at line \textbf{256}; saves with MD5 filename at lines \textbf{257--258}.
+\end{itemize}
+
+\section{StudyScreen.kt (Audio Cache Flow)}
+\textbf{Purpose:} Cache-first playback logic.
+\begin{itemize}[leftmargin=*]
+  \item playAudio lambda: lines \textbf{116--203} cache check at lines \textbf{124--125}; if cached: immediate playback at lines \textbf{126--149}; if not: fetch from Lambda at lines \textbf{161--163}; decode and save at lines \textbf{167--169}.
+\end{itemize}
+
+\chapter{Use Case: Navigation with Back Button and Status Feedback}
+
+\section{TopBarComponent.kt}
+\textbf{Purpose:} Display title with conditional back button.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{15--17}; TopAppBar at lines \textbf{18--41}.
+  \item Back button: lines \textbf{20--30} conditional IconButton; calls `showBack()` at line \textbf{23}.
+  \item Colors: lines \textbf{34--40} Material3 theming.
+\end{itemize}
+
+\section{BottomBarComponent.kt}
+\textbf{Purpose:} Display status messages for feedback.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{12--14}; Box container at line \textbf{15}.
+  \item Status Text: lines \textbf{16--22} displays message parameter with center alignment.
+\end{itemize}
+
+\section{Navigator.kt (Back Navigation)}
+\textbf{Purpose:} Manage navigation stack and shared message state.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{28--33}; shared message state at lines \textbf{34--35}.
+  \item changeMessage callback: lines \textbf{37--39} updates shared state.
+  \item Scaffold structure: lines \textbf{41--246} TopBar at lines \textbf{42--48}; BottomBar at line \textbf{43}; NavHost at lines \textbf{50--245}.
+  \item Back button: All routes except HomeRoute show back button calling `navigation.popBackStack()`.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Type-safe navigation routes with `@Serializable`.
+\begin{itemize}[leftmargin=*]
+  \item HomeRoute: line \textbf{9} main menu.
+  \item SearchCardsRoute: lines \textbf{18--23} data class with 4 search parameters.
+  \item EditCardRoute: line \textbf{32} data class with cardId.
+  \item TokenRoute: line \textbf{35} data class with email.
+\end{itemize}
+
+\chapter{Supporting Infrastructure}
+
+\section{Navigator.kt (AppNavigation)}
+\textbf{Purpose:} Centralized navigation with type-safe routes and dependencies.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{28--33}; shared message at lines \textbf{35--36}.
+  \item Scaffold: lines \textbf{60--88} TopBar at lines \textbf{62--67}; BottomBar at lines \textbf{68--70}; NavHost at lines \textbf{73--246}.
+  \item Route implementations: HomeRoute at lines \textbf{78--89}; LoginRoute at lines \textbf{91--102}; TokenRoute at lines \textbf{190--200}; AddCardRoute at lines \textbf{116--130} with insertFlashCard callback; FilterRoute at lines \textbf{132--142}; SearchCardsRoute at lines \textbf{144--172} with parameter extraction; EditCardRoute at lines \textbf{174--188}; StudyCardsRoute at lines \textbf{104--114}; ShowCardRoute at lines \textbf{202--219}.
+\end{itemize}
+
+\section{Routes.kt}
+\textbf{Purpose:} Type-safe route definitions with parameters.
+\begin{itemize}[leftmargin=*]
+  \item HomeRoute: line \textbf{9} main menu.
+  \item AddCardRoute: line \textbf{12} add flashcard.
+  \item StudyCardsRoute: line \textbf{15} study session.
+  \item SearchCardsRoute: lines \textbf{18--23} data class with 4 search parameters.
+  \item LoginRoute: line \textbf{26} authentication.
+  \item ShowCardRoute: line \textbf{29} data class with cardId.
+  \item EditCardRoute: line \textbf{32} data class with cardId.
+  \item TokenRoute: line \textbf{35} data class with email.
+  \item FilterRoute: line \textbf{38} search input.
+\end{itemize}
+
+\section{MenuScreen.kt}
+\textbf{Purpose:} Main menu with navigation buttons.
+\begin{itemize}[leftmargin=*]
+  \item Composable function: lines \textbf{15--19} callbacks for navigation.
+  \item UI layout: lines \textbf{25--84} Column with 4 buttons.
+  \item Add Card button: lines \textbf{28--34} calls `onAdd()`.
+  \item Study Cards button: lines \textbf{36--42} calls `onStudy()`.
+  \item Search Cards button: lines \textbf{44--50} calls `onSearch()`.
+\end{itemize}
+
+\section{MenuDatabase.kt}
+\textbf{Purpose:} Room database definition and singleton.
+\begin{itemize}[leftmargin=*]
+  \item Database annotation: lines \textbf{12--14} `@Database` with FlashCard entity.
+  \item Abstract class: lines \textbf{15--16} extends RoomDatabase; DAO accessor.
+  \item Companion singleton: lines \textbf{17--30} double-checked locking at lines \textbf{21--29}.
+\end{itemize}
+
+\section{FlashCardDao.kt}
+\textbf{Purpose:} Data access object for all CRUD operations.
+\begin{itemize}[leftmargin=*]
+  \item Interface: line \textbf{14} `@Dao`.
+  \item GetAll: line \textbf{19} `SELECT * FROM FlashCards`.
+  \item GetById: line \textbf{28} `SELECT WHERE uid = :id`.
+  \item Delete: lines \textbf{29--30} `@Delete`.
+  \item Insert single: lines \textbf{34--35} `@Insert(onConflict = IGNORE)`.
+  \item Insert batch: lines \textbf{37--38} `insertAll(vararg)`.
+  \item Update: lines \textbf{40--50} `@Query UPDATE` with id, english, vietnamese.
+  \item Filter query: lines \textbf{52--82} CASE WHEN logic for exact/partial match.
+\end{itemize}
+
+\section{MainActivity.kt}
+\textbf{Purpose:} Initialize database, Retrofit, and DataStore.
+\begin{itemize}[leftmargin=*]
+  \item DataStore setup: line \textbf{17} singleton delegate; keys at lines \textbf{18--19}.
+  \item onCreate: lines \textbf{25--63} initialize MenuDatabase at lines \textbf{28--29}; Retrofit at lines \textbf{33--45}; AppNavigation call at lines \textbf{55--60}.
+\end{itemize}
+
+\end{document}

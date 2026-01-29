@@ -1,36 +1,12 @@
 package com.example.menuannam
 
-/**
- * ============================================================
- * MAIN ACTIVITY - App Entry Point
- * ============================================================
- * Initializes all core services and sets up the Compose UI
- *
- * Responsibilities:
- * 1. Initialize Room database (FlashCardDatabase)
- * 2. Create Retrofit/OkHttpClient for API calls
- * 3. Set up DataStore for persistent preferences
- * 4. Initialize Navigation system
- * 5. Provide CoroutineScope for async operations
- *
- * Service Setup:
- * - Database: FlashCardDatabase.getDatabase() → singleton pattern
- * - Network: Retrofit with OkHttpClient (30s timeouts)
- * - DataStore: Stores EMAIL and TOKEN in app preferences
- * - Navigation: Type-safe Compose Navigation with NavController
- *
- * Data Flow:
- * 1. MainActivity creates all services
- * 2. Passes them to AppNavigation composable
- * 3. AppNavigation manages all screens and routing
- * 4. Screens use dao, networkService, and scope for operations
- * ============================================================
- */
+// Main entry point: initializes database, network, navigation, and DataStore for app
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.rememberNavController
@@ -43,17 +19,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+// DataStore for persistent user credentials (email/token)
 val Context.dataStore by preferencesDataStore(name = "user_credentials")
 val TOKEN = stringPreferencesKey("token")
 val EMAIL = stringPreferencesKey("email")
-/**
- * DataStore setup - Persistent key-value storage for user preferences
- * val dataStore: DataStore<Preferences> - initialized by delegation
- * val TOKEN: PreferencesKey<String> - stores authentication token
- * val EMAIL: PreferencesKey<String> - stores user email
- *
- * Accessed via: context.dataStore.data.collect() or context.dataStore.data.first()
- */
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,24 +35,26 @@ class MainActivity : ComponentActivity() {
                 val appContext = applicationContext
                 val scope = rememberCoroutineScope()
 
+                // Database singleton for flashcard CRUD operations
                 val db = FlashCardDatabase.getDatabase(appContext)
                 val flashCardDao = db.flashCardDao()
 
-                // Create a single OkHttpClient instance with timeouts
+                // HTTP client with 30s timeouts to prevent Lambda timeout issues
                 val sharedOkHttpClient = OkHttpClient.Builder()
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .build()
 
-                // Create the Retrofit instance with the shared OkHttpClient
+                // Retrofit for Lambda API calls (token generation, audio synthesis)
                 val retrofit: Retrofit = Retrofit.Builder()
-                    .baseUrl("https://placeholder.com")
+                    .baseUrl("https://placeholder.com") // URL overridden per endpoint
                     .client(sharedOkHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
                 val networkService = retrofit.create(NetworkService::class.java)
 
+                // Pass all services to navigation system
                 AppNavigation(
                     navController,
                     flashCardDao,
