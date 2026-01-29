@@ -2,85 +2,37 @@ package com.example.menuannam.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-/**
- * ============================================================
- * TYPE-SAFE NAVIGATION ROUTES
- * ============================================================
- * These @Serializable objects define all navigation destinations
- * NavHost uses these instead of string routes for compile-time safety
- * Kotlinx.serialization handles automatic serialization for route parameters
- *
- * Benefits:
- * - Compile-time verification (misspelled routes = compilation error)
- * - Automatic type conversion for parameters
- * - Better IDE support and refactoring
- * ============================================================
- */
+// TYPE-SAFE NAVIGATION ROUTES: @Serializable objects for compile-time verification
+// Kotlinx.serialization handles automatic type conversion for route parameters
 
-/**
- * HomeRoute - Main menu screen
- * Shows options to: Study, Add Cards, Search, Login
- * No parameters needed
- */
 @Serializable
-object HomeRoute
+object HomeRoute // Main menu: Study, Add Cards, Search, Login
 
-/**
- * AddCardRoute - Screen to create new flashcard
- * Displays form for English and Vietnamese input
- * No parameters needed
- */
 @Serializable
-object AddCardRoute
+object AddCardRoute // Create new flashcard with English/Vietnamese input
 
-/**
- * StudyCardsRoute - Screen for studying random flashcards
- * Loads 5 random cards in shuffled order
- * User taps to reveal Vietnamese and listen to audio
- * No parameters needed
- */
 @Serializable
-object StudyCardsRoute
+object StudyCardsRoute // Study 5 random cards with audio playback
 
-/**
- * SearchCardsRoute - Screen to search and manage flashcards
- * Allows viewing, editing, deleting existing cards
- * No parameters needed
- */
 @Serializable
-object SearchCardsRoute
+data class SearchCardsRoute( // Display filtered search results with edit/delete options
+    val englishText: String = "", // English search term
+    val exactEnglish: Int = 0, // 1 for exact match, 0 for partial match
+    val vietnameseText: String = "", // Vietnamese search term
+    val exactVietnamese: Int = 0 // 1 for exact match, 0 for partial match
+)
 
-/**
- * LoginRoute - Authentication screen
- * User enters email to get token for audio synthesis
- * No parameters needed
- */
 @Serializable
-object LoginRoute
+object LoginRoute // User enters email to get token for audio synthesis
 
-/**
- * ShowCardRoute - Screen to view single flashcard details
- * Displays both English and Vietnamese
- * Allows delete operation and audio playback
- * @param english English word/phrase (passed from SearchCardsRoute)
- * @param vietnamese Vietnamese translation (passed from SearchCardsRoute)
- */
 @Serializable
-data class ShowCardRoute(val english: String, val vietnamese: String)
+data class ShowCardRoute(val id: Int) // View single flashcard with delete and audio playback
 
-/**
- * EditCardRoute - Screen to edit an existing flashcard
- * @param english Original English text (for lookup)
- * @param vietnamese Original Vietnamese text (for lookup)
- * New values are entered in UI and sent back to update
- */
 @Serializable
-data class EditCardRoute(val english: String, val vietnamese: String)
+data class EditCardRoute(val id: Int) // Edit existing flashcard by ID
 
-/**
- * TokenRoute - Token input screen
- * User enters token obtained from email login
- * @param email Email address (passed from LoginRoute for context)
- */
 @Serializable
-data class TokenRoute(val email: String)
+data class TokenRoute(val email: String) // Token input screen - email passed from LoginRoute for context
+
+@Serializable
+object FilterRoute // Filter search screen with English/Vietnamese terms and exact/partial match options

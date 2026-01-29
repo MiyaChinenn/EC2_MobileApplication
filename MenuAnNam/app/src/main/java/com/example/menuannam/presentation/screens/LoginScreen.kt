@@ -1,6 +1,5 @@
 package com.example.menuannam.presentation.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,33 +24,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * LoginScreen - Get user email for authentication
- * First step of login workflow: collect email, send to Lambda for token
- *
- * Flow:
- * 1. User enters email address
- * 2. Click "Login" button
- * 3. networkService.generateToken() sends email to AWS Lambda
- * 4. Lambda validates email and returns authentication token
- * 5. Token is saved to DataStore
- * 6. Navigate to TokenScreen with token string
- *
- * API Integration:
- * - Retrofit call: generateToken(email: UserCredential) -> TokenResponse
- * - Response code 200 means success, token in response.message
- * - Handles network errors gracefully with try/catch
- *
- * Parameters:
- * @param changeMessage Updates status bar with feedback
- * @param networkService Retrofit interface for Lambda API
- * @param navigateToToken Callback to show token entry screen with email
- */
 @Composable
 fun LoginScreen(
-    changeMessage: (String) -> Unit,
-    networkService: NetworkService,
-    navigateToToken: (String) -> Unit
+    changeMessage: (String) -> Unit, // Updates status bar with feedback
+    networkService: NetworkService, // Retrofit interface for Lambda API
+    navigateToToken: (String) -> Unit // Callback to show TokenScreen with email
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -79,24 +56,19 @@ fun LoginScreen(
                 .semantics { contentDescription = "Enter" },
             onClick = {
                 scope.launch {
-                    try {
+                    try { // Send email to AWS Lambda for token generation
                         val result = withContext(Dispatchers.IO) {
-                            networkService.generateToken(
-                                credential = UserCredential(email)
-                            )
+                            networkService.generateToken(email = UserCredential(email))
                         }
-                        if (result.code == 200) {
+                        if (result.code == 200) { // Response code 200 means success
                             changeMessage("Token sent to email: ${result.message}")
-                            Log.d("FLASHCARD", "Token request successful: ${result.message}")
                             navigateToToken(email)
                         } else {
                             changeMessage("Error: ${result.message}")
-                            Log.d("FLASHCARD", "Token request failed with code ${result.code}: ${result.message}")
                         }
 
                     } catch (e: Exception) {
                         changeMessage("There was an error in the token request.")
-                        Log.d("FLASHCARD", "Unexpected exception: $e")
                     }
                 }
             }

@@ -10,94 +10,47 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.example.menuannam.data.database.FlashCardDao
-import com.example.menuannam.data.entity.FlashCard
-import com.example.menuannam.presentation.screens.MenuAnNam
+import com.example.menuannam.presentation.screens.MenuScreen
 import com.example.menuannam.presentation.screens.AddScreen
 import com.example.menuannam.presentation.screens.StudyScreen
+import com.example.menuannam.presentation.screens.CardViewMode
 import com.example.menuannam.presentation.screens.SearchScreen
-import com.example.menuannam.presentation.screens.ShowCardScreen
+import com.example.menuannam.presentation.screens.FilterScreen
+import com.example.menuannam.presentation.screens.EditScreen
 import com.example.menuannam.presentation.screens.LoginScreen
 import com.example.menuannam.presentation.screens.TokenScreen
 import com.example.menuannam.data.network.NetworkService
 import com.example.menuannam.presentation.components.TopBarComponent
 import com.example.menuannam.presentation.components.BottomBarComponent
 
-/**
- * ============================================================
- * APP NAVIGATION - Central Navigation Hub
- * ============================================================
- * Controls all screen transitions and manages app state
- * Uses Compose Navigation with type-safe routes
- *
- * Architecture:
- * 1. NavHost - container for all composable screens
- * 2. Scaffold - top-level layout (TopBar + Content + BottomBar)
- * 3. composable<Route> - each route is a screen
- * 4. Shared state - message, flashCards updated across screens
- *
- * Type-Safe Routes vs String Routes:
- * - Compile-time error checking
- * - Automatic serialization of parameters
- * - Better IDE support
- * ============================================================
- */
+// Central Navigation Hub: Controls all screen transitions and manages app state
+// Uses Compose Navigation with type-safe routes for compile-time error checking
 @Composable
 fun AppNavigation(
-    navigation: NavHostController,      // NavController from MainActivity
-    flashCardDao: FlashCardDao,         // Database access
-    coroutineScope: CoroutineScope,     // For async operations (launched from MainActivity)
-    networkService: NetworkService      // Retrofit service for API calls
+    navigation: NavHostController, // NavController from MainActivity
+    flashCardDao: FlashCardDao, // Database access
+    coroutineScope: CoroutineScope, // For async operations (launched from MainActivity)
+    networkService: NetworkService // Retrofit service for API calls
 ) {
-    // ===== STATE MANAGEMENT =====
-    
-    /**
-     * Shared message across all screens
-     * Updated by each screen to show status/feedback
-     * Displayed in BottomBar
-     */
+    // Shared message across all screens - updated by each screen, displayed in BottomBar
     var message by remember { mutableStateOf("Welcome!") }
     val changeMessage: (String) -> Unit = { message = it }
 
-    /**
-     * All flashcards loaded at startup
-     * Used by SearchScreen for list display
-     * Updated when cards are added/deleted
-     */
-    var flashCards by remember { mutableStateOf(emptyList<FlashCard>()) }
-
-    /**
-     * LaunchedEffect runs once on composition
-     * Loads all flashcards from database on app startup
-     */
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            flashCards = flashCardDao.getAll()
-        }
-    }
-
-    // ===== DYNAMIC TITLE & BACK BUTTON =====
-    
-    /**
-     * Get current route name from back stack
-     * Determines what screen is currently displayed
-     */
+    // Get current route name from back stack to determine what screen is currently displayed
     val backStackEntry by navigation.currentBackStackEntryAsState()
     val routeName = backStackEntry?.destination?.route
 
-    /**
-     * Map route names to user-friendly titles
-     * Displays in TopBar
-     */
+    // Map route names to user-friendly titles displayed in TopBar
     val title = when (routeName) {
         HomeRoute::class.qualifiedName -> "Menu An Nam"
         StudyCardsRoute::class.qualifiedName -> "Study Cards"
         AddCardRoute::class.qualifiedName -> "Add Card"
-        SearchCardsRoute::class.qualifiedName -> "Search Cards"
+        SearchCardsRoute::class.qualifiedName -> "Search Results"
+        FilterRoute::class.qualifiedName -> "Search Cards"
         LoginRoute::class.qualifiedName -> "Login"
         ShowCardRoute::class.qualifiedName -> "Flash Card"
+        EditCardRoute::class.qualifiedName -> "Edit Card"
         else -> "Menu An Nam"
     }
 
@@ -143,12 +96,12 @@ fun AppNavigation(
             // HOME ROUTE - Main menu
             // ============================================================
             composable<HomeRoute> {
-                MenuAnNam(
+                MenuScreen(
                     onStudy = {
                         navigation.navigate(StudyCardsRoute)
                     },
                     onAdd = { navigation.navigate(AddCardRoute) },
-                    onSearch = { navigation.navigate(SearchCardsRoute) },
+                    onSearch = { navigation.navigate(FilterRoute) },
                     onLogin = { navigation.navigate(LoginRoute) },
                     changeMessage = changeMessage
                 )
@@ -175,6 +128,7 @@ fun AppNavigation(
                     changeMessage = changeMessage,
                     flashCardDao = flashCardDao,
                     networkService = networkService,
+                    mode = CardViewMode.STUDY_SESSION,
                     coroutineScope = coroutineScope
                 )
             }
@@ -189,8 +143,6 @@ fun AppNavigation(
                         coroutineScope.launch {
                             // Insert card (Room ignores if duplicate)
                             flashCardDao.insertAll(card)
-                            // Reload all cards from database
-                            flashCards = flashCardDao.getAll()
                             changeMessage("Added: ${card.englishCard}")
                         }
                     }
@@ -198,16 +150,36 @@ fun AppNavigation(
             }
 
             // ============================================================
-            // SEARCH CARDS ROUTE - Browse and manage existing cards
+            // SEARCH CARDS ROUTE - Display filtered search results
             // ============================================================
-            composable<SearchCardsRoute> {
+            composable<SearchCardsRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<SearchCardsRoute>()
                 SearchScreen(
-                    flashCards = flashCards,
-                    selectedItem = { card ->
+                    changeMessage = changeMessage,
+                    flashCardDao = flashCardDao,
+                    onEdit = { cardId ->
+                        navigation.navigate(EditCardRoute(cardId))
+                    },
+                    englishText = route.englishText,
+                    exactEnglish = route.exactEnglish,
+                    vietnameseText = route.vietnameseText,
+                    exactVietnamese = route.exactVietnamese
+                )
+            }
+
+            // ============================================================
+            // FILTER ROUTE - Search input form
+            // ============================================================
+            composable<FilterRoute> {
+                FilterScreen(
+                    changeMessage = changeMessage,
+                    onSearch = { en, exactEn, vn, exactVn ->
                         navigation.navigate(
-                            ShowCardRoute(
-                                english = card.englishCard ?: "",
-                                vietnamese = card.vietnameseCard ?: ""
+                            SearchCardsRoute(
+                                englishText = en,
+                                exactEnglish = exactEn,
+                                vietnameseText = vn,
+                                exactVietnamese = exactVn
                             )
                         )
                     }
@@ -215,36 +187,36 @@ fun AppNavigation(
             }
 
             // ============================================================
+            // EDIT CARD ROUTE - Edit existing flashcard with audio management
+            // ============================================================
+            composable<EditCardRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<EditCardRoute>()
+                EditScreen(
+                    cardId = route.id,
+                    flashCardDao = flashCardDao,
+                    networkService = networkService,
+                    changeMessage = changeMessage,
+                    onCardUpdated = { navigation.navigateUp() }
+                )
+            }
+
+            // ============================================================
             // SHOW CARD ROUTE - View single card and delete if desired
             // ============================================================
             /**
-             * Receives parameters from SearchScreen (english, vietnamese)
-             * Extracts route parameters using toRoute<ShowCardRoute>()
-             * Creates FlashCard object for display
+             * Receives cardId from SearchScreen
+             * Displays full card details with delete and play audio options
              */
             composable<ShowCardRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<ShowCardRoute>()
 
-                ShowCardScreen(
-                    flashCard = FlashCard(
-                        uid = 0,
-                        englishCard = route.english,
-                        vietnameseCard = route.vietnamese
-                    ),
-                    onDelete = { card ->
-                        coroutineScope.launch {
-                            // Delete from database using card content
-                            flashCardDao.deleteFlashCard(
-                                english = card.englishCard ?: "",
-                                vietnamese = card.vietnameseCard ?: ""
-                            )
-                            // Reload all cards
-                            flashCards = flashCardDao.getAll()
-                            changeMessage("Deleted: ${card.englishCard}")
-                            // Go back to search screen
-                            navigation.navigateUp()
-                        }
-                    }
+                StudyScreen(
+                    changeMessage = changeMessage,
+                    flashCardDao = flashCardDao,
+                    networkService = networkService,
+                    mode = CardViewMode.SINGLE_CARD,
+                    cardId = route.id,
+                    onCardDeleted = { navigation.navigateUp() }
                 )
             }
 

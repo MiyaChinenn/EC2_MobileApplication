@@ -28,34 +28,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * TokenScreen - Confirm and save authentication token
- * Second step of login workflow: receive token from email, save to persistent storage
- *
- * Flow:
- * 1. User receives token string via email from Lambda
- * 2. User pastes/types token into TextField
- * 3. Click "Save Token" button
- * 4. Token is saved to DataStore (Preferences)
- * 5. Navigate back to HomeRoute
- * 6. Future audio requests use this token for authentication
- *
- * DataStore Persistence:
- * - TOKEN key stores authentication token
- * - EMAIL key stores user email (from LoginScreen)
- * - Used by StudyScreen and ShowCardScreen for audio requests
- * - Token enables AWS Lambda to authorize audio synthesis
- *
- * Parameters:
- * @param email User email (passed from LoginScreen, displayed as context)
- * @param changeMessage Updates status bar with feedback
- * @param navigateToHome Callback to return to main menu
- */
 @Composable
 fun TokenScreen(
-    email: String,
-    changeMessage: (String) -> Unit,
-    navigateToHome: (String) -> Unit
+    email: String, // User email from LoginScreen, displayed as context
+    changeMessage: (String) -> Unit, // Updates status bar with feedback
+    navigateToHome: (String) -> Unit // Return to main menu after save
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -95,7 +72,7 @@ fun TokenScreen(
                 .semantics { contentDescription = "Enter" },
             onClick = {
                 scope.launch {
-                    withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.IO) { // Save token and email to DataStore for future audio requests
                         appContext.dataStore.edit { preferences ->
                             preferences[EMAIL] = email
                             preferences[TOKEN] = token

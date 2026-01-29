@@ -14,34 +14,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.example.menuannam.data.entity.FlashCard
 
-
-/**
- * AddScreen - Create new flashcard
- * User enters English and Vietnamese text, then submits to save
- *
- * Flow:
- * 1. User types English and Vietnamese text in TextFields
- * 2. Click "Add Card" button
- * 3. insertFlashCard callback tries to insert to database
- * 4. Room handles OnConflictStrategy.IGNORE (silently ignores duplicates)
- * 5. Success message displayed via changeMessage
- *
- * Architecture:
- * - Callback-based design: allows caller (Navigator) to control insert logic
- * - TextFields persist state (rememberSaveable)
- * - Semantics allow testing framework to identify elements
- *
- * Parameters:
- * @param changeMessage Updates status bar with feedback
- * @param insertFlashCard Callback to save card (receives FlashCard)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-    changeMessage: (String) -> Unit,
-    insertFlashCard: (FlashCard) -> Unit
+    changeMessage: (String) -> Unit, // Updates status bar with feedback
+    insertFlashCard: (FlashCard) -> Unit // Callback to save card (receives FlashCard)
 ) {
-    var english by rememberSaveable { mutableStateOf("") }
+    var english by rememberSaveable { mutableStateOf("") } // TextFields persist state across recomposition
     var vietnamese by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -81,12 +60,12 @@ fun AddScreen(
         ) {
             Button(
                 onClick = {
-                    try {
+                    try { // Room handles OnConflictStrategy.IGNORE (silently ignores duplicates)
                         insertFlashCard(FlashCard(0, english, vietnamese))
                         changeMessage("Flash card successfully added to your database.")
                         english = ""
                         vietnamese = ""
-                    } catch (e: Exception) {
+                    } catch (e: Exception) { // Duplicate detection
                         changeMessage("Flash card already exists in your database.")
                     }
                 },

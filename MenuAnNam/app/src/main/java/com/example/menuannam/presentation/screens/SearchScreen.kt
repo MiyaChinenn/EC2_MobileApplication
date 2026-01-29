@@ -27,43 +27,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.menuannam.data.database.FlashCardDao
 import com.example.menuannam.data.entity.FlashCard
 
-/**
- * SearchScreen - Browse, search, and manage all flashcards
- * Displays a searchable list of all cards with edit/delete options
- *
- * Flow:
- * 1. Display all cards in LazyColumn (scrollable list)
- * 2. User searches by typing in search field
- * 3. Cards are filtered in real-time by English or Vietnamese text
- * 4. User taps on card to view details (ShowCardScreen)
- * 5. User can edit English/Vietnamese inline
- * 6. User can delete card (removed from database immediately)
- *
- * Sub-Composables:
- * - FlashCardList: Displays cards with edit/delete buttons
- * - SearchCardsScreen: Main container with search bar and list
- *
- * State:
- * - searchQuery: User's search input
- * - filteredCards: Cards matching search query (filtered from flashCards)
- * - editingCardId: Which card is being edited inline
- *
- * Database Operations:
- * - updateFlashCard: Updates card content
- * - deleteFlashCard: Removes card from database
- */
+// FlashCardList component - LazyColumn displaying flashcards with edit/delete buttons
 @Composable
 fun FlashCardList(
-    selectedItem: (Int) -> Unit,
     flashCards: List<FlashCard>,
-    onEdit: (FlashCard) -> Unit = {},
-    onDelete: (FlashCard) -> Unit = {}
+    onEdit: (Int) -> Unit = {}, // Navigate to EditCardRoute with card ID
+    onDelete: (FlashCard) -> Unit = {} // Delete card from database
 ) {
     LazyColumn(
         modifier = Modifier.padding(16.dp)
@@ -74,10 +51,6 @@ fun FlashCardList(
                 flashCard.uid
             }
         ) { flashCard ->
-            var isEditing by remember { mutableStateOf(false) }
-            var editEnglish by remember { mutableStateOf(flashCard.englishCard ?: "") }
-            var editVietnamese by remember { mutableStateOf(flashCard.vietnameseCard ?: "") }
-            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,72 +58,28 @@ fun FlashCardList(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isEditing) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        OutlinedTextField(
-                            value = editEnglish,
-                            onValueChange = { editEnglish = it },
-                            label = { Text("en", fontSize = 12.sp) }
-                        )
-                        Spacer(modifier = Modifier.size(4.dp))
-                        OutlinedTextField(
-                            value = editVietnamese,
-                            onValueChange = { editVietnamese = it },
-                            label = { Text("vn", fontSize = 12.sp) }
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Button(
-                            onClick = {
-                                val updatedCard = flashCard.copy(
-                                    englishCard = editEnglish,
-                                    vietnameseCard = editVietnamese
-                                )
-                                onEdit(updatedCard)
-                                isEditing = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Save", fontSize = 12.sp)
-                        }
-                        Spacer(modifier = Modifier.size(4.dp))
-                        Button(
-                            onClick = {
-                                editEnglish = flashCard.englishCard ?: ""
-                                editVietnamese = flashCard.vietnameseCard ?: ""
-                                isEditing = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Cancel", fontSize = 12.sp)
-                        }
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { selectedItem(flashCard.uid) }
-                            .padding(6.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(6.dp)
+                ) {
+                    Text("${flashCard.englishCard ?: ""} = ${flashCard.vietnameseCard ?: ""}")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Button(
+                        onClick = { onEdit(flashCard.uid) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        Text("${flashCard.englishCard ?: ""} = ${flashCard.vietnameseCard ?: ""}")
+                        Text("Edit", fontSize = 12.sp)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    Button(
+                        onClick = { onDelete(flashCard) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Button(
-                            onClick = { isEditing = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Edit", fontSize = 12.sp)
-                        }
-                        Button(
-                            onClick = { onDelete(flashCard) },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Delete", fontSize = 12.sp)
-                        }
+                        Text("Delete", fontSize = 12.sp)
                     }
                 }
             }
@@ -163,71 +92,62 @@ fun FlashCardList(
 fun SearchScreen(
     changeMessage: (String) -> Unit = {},
     flashCardDao: FlashCardDao,
-    selectedItem: (Int) -> Unit
+    onEdit: (Int) -> Unit = {},
+    englishText: String = "",
+    exactEnglish: Int = 0,
+    vietnameseText: String = "",
+    exactVietnamese: Int = 0
 ) {
-    var flashCards by remember { mutableStateOf<List<FlashCard>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    var filteredCards by remember { mutableStateOf<List<FlashCard>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    val loadFlashCards = {
+    val performSearch = {
         coroutineScope.launch {
             try {
-                flashCards = flashCardDao.getAll()
+                isLoading = true
+                filteredCards = flashCardDao.getFilteredFlashCards(englishText, exactEnglish, vietnameseText, exactVietnamese)
+                changeMessage("Found ${filteredCards.size} cards")
                 isLoading = false
             } catch (e: Exception) {
-                changeMessage("Error loading flash cards: ${e.message}")
+                changeMessage("Error: ${e.message}")
                 isLoading = false
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        changeMessage("Manage your flash cards.")
-        loadFlashCards()
+        performSearch()
     }
     
     Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Spacer(
-            modifier = Modifier.size(16.dp)
-        )
+        // Results display
         if (isLoading) {
-            Text("Loading flash cards...")
-        } else if (flashCards.isNotEmpty()) {
+            Text("Searching...")
+        } else if (filteredCards.isEmpty()) {
+            Text("No cards found. Try different search terms.")
+        } else {
             FlashCardList(
-                flashCards = flashCards,
-                selectedItem = selectedItem,
-                onEdit = { updatedCard ->
-                    coroutineScope.launch {
-                        try {
-                            flashCardDao.update(
-                                updatedCard.uid,
-                                updatedCard.englishCard ?: "",
-                                updatedCard.vietnameseCard ?: ""
-                            )
-                            changeMessage("Card updated successfully!")
-                            loadFlashCards()
-                        } catch (e: Exception) {
-                            changeMessage("Error updating card: ${e.message}")
-                        }
-                    }
-                },
+                flashCards = filteredCards,
+                onEdit = onEdit,
                 onDelete = { cardToDelete ->
                     coroutineScope.launch {
                         try {
                             flashCardDao.delete(cardToDelete)
                             changeMessage("Card deleted successfully!")
-                            loadFlashCards()
+                            performSearch()
                         } catch (e: Exception) {
                             changeMessage("Error deleting card: ${e.message}")
                         }
                     }
                 }
             )
-        } else {
-            Text("No flash cards found. Add some cards first!")
         }
     }
 }
