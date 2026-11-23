@@ -24,3 +24,10 @@ captures/
 
 # Kotlin
 .kotlin/
+
+# Binary / local course artifacts
+*.apk
+*.zip
+*.docx
+.vscode/
+exam/
